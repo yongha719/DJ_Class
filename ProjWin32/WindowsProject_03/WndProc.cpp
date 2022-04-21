@@ -8,7 +8,7 @@ int OnPaint(HWND hWnd, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
 	// TODO: 여기에 hdc를 사용하는 그리기 코드를 추가합니다...
-	TextOutW(hdc, x, y, L"┌─────────┐", 11);
+	TextOutW(hdc, x,   y,    L"┌─────────┐", 11);
 	TextOutW(hdc, x, y + 16, strTime, 12);
 	TextOutW(hdc, x, y + 32, L"└─────────┘", 11);
 	EndPaint(hWnd, &ps);
