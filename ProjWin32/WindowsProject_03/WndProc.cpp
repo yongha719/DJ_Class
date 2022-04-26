@@ -3,7 +3,7 @@
 int x, y;
 TCHAR strTime[128] = L"";
 
-int OnPaint(HWND hWnd, WPARAM wParam, LPARAM lParam)
+int OnPaint(HWND hWnd, WPARAM wParam, LPARAM lParam) 
 {
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(hWnd, &ps);
