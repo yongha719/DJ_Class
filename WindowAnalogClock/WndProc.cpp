@@ -16,6 +16,9 @@ int HourNeedle = 70;
 int MinNeedle = 100;
 int SecondNeedle = 100;
 
+/// <summary>
+/// 창 만들것을 요청할때 전송됨
+/// </summary>
 int OnCreate(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 
 	hScreenDC = GetDC(hWnd);
@@ -36,6 +39,42 @@ int OnCreate(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
+/// <summary>
+/// 시곗바늘 그려주는 함수
+/// </summary>
+int SetNeedles() {
+	POINT ptNeedle = { 0,0 };
+	float theta = 0.0f;
+
+	//시침 바늘 그려주는 부분
+	theta = PI / 180.0f * ((Hour - 4.5f) * 30);
+	ptNeedle.x = (cos(theta) * HourNeedle) - (sin(theta) * HourNeedle);
+	ptNeedle.y = (cos(theta) * HourNeedle) + (sin(theta) * HourNeedle);
+	MoveToEx(hMemoryDC, 150, 150, NULL);
+	LineTo(hMemoryDC, 150 + ptNeedle.x, 150 + ptNeedle.y);
+
+	//분침
+	theta = PI / 180.0f * ((Min - 22.5f) * 6);
+	ptNeedle.x = (cos(theta) * MinNeedle) - (sin(theta) * MinNeedle);
+	ptNeedle.y = (cos(theta) * MinNeedle) + (sin(theta) * MinNeedle);
+	MoveToEx(hMemoryDC, 150, 150, NULL);
+	LineTo(hMemoryDC, 150 + ptNeedle.x, 150 + ptNeedle.y);
+
+	//초침
+	theta = PI / 180.0f * ((Second - 22.5f) * 6);
+	ptNeedle.x = cos(theta) * SecondNeedle - sin(theta) * SecondNeedle;
+	ptNeedle.y = cos(theta) * SecondNeedle + sin(theta) * SecondNeedle;
+	MoveToEx(hMemoryDC, 150, 150, NULL);
+	LineTo(hMemoryDC, 150 + ptNeedle.x, 150 + ptNeedle.y);
+
+	return 0;
+}
+
+
+/// <summary>
+/// 화면 출력 관련 함수
+/// 이미지 출력, 콘솔 이름 등등
+/// </summary>
 int OnTimer(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 
 	SYSTEMTIME st;
@@ -49,38 +88,32 @@ int OnTimer(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 	POINT ptNeedle = { 0,0 };
 	float theta = 0.0f;
 	TCHAR strClock[128] = L"";
-	wsprintf(strClock, L"%2d : %02d : % 02d", Hour, Min, Second);
-	SetWindowText(hWnd, L"가나다라");
+
+	SetWindowText(hWnd, L"윈도우 아날로그 시계 수행평가");
+
+	//텍스트 출력
+	TCHAR Time[10] = L"";
+
+	//wsprintf 첫번째 인자에 두번째인자에 들어간 문자열이 담김
+	if (Hour < 12) wsprintf(Time, L"아침");
+	else wsprintf(Time, L"저녁");
+	wsprintf(strClock, L"지금은 %s %2d : %02d : %02d입니다", Time, Hour % 12, Min, Second);
+	TextOut(hScreenDC, 50, 400, strClock, 22);
 
 	//이미지를 화면에 출력해주는 함수
 	//비트맵파일을 읽어와야 가능함
 	BitBlt(hMemoryDC, 0, 0, 300, 300, hImageDC, 0, 0, SRCCOPY);
-	{
-		theta = PI / 180.0f * ((Hour - 4.5f) * 30);
-		ptNeedle.x = (cos(theta) * HourNeedle) - (sin(theta) * HourNeedle);
-		ptNeedle.y = (cos(theta) * HourNeedle) + (sin(theta) * HourNeedle);
-		MoveToEx(hMemoryDC, 150, 150, NULL);
-		LineTo(hMemoryDC, 150 + ptNeedle.x, 150 + ptNeedle.y);
-	}
-	{
-		theta = PI / 180.0f * ((Min - 22.5f) * 6);
-		ptNeedle.x = (cos(theta) * MinNeedle) - (sin(theta) * MinNeedle);
-		ptNeedle.y = (cos(theta) * MinNeedle) + (sin(theta) * MinNeedle);
-		MoveToEx(hMemoryDC, 150, 150, NULL);
-		LineTo(hMemoryDC, 150 + ptNeedle.x, 150 + ptNeedle.y);
-	}
-	{
-		theta = PI / 180.0f * ((Second - 22.5f) * 6);
-		ptNeedle.x = cos(theta) * SecondNeedle - sin(theta) * SecondNeedle;
-		ptNeedle.y = cos(theta) * SecondNeedle + sin(theta) * SecondNeedle;
-		MoveToEx(hMemoryDC, 150, 150, NULL);
-		LineTo(hMemoryDC, 150 + ptNeedle.x, 150 + ptNeedle.y);
-	}
+	SetNeedles();
+
 	BitBlt(hScreenDC, 0, 0, 300, 300, hMemoryDC, 0, 0, SRCCOPY);
+
 
 	return 0;
 }
 
+/// <summary>
+/// 화면을 그리는 함수 여기선 OnPaint에서 함
+/// </summary>
 int OnPaint(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 
 	PAINTSTRUCT ps;
@@ -93,10 +126,13 @@ int OnPaint(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
+/// <summary>
+/// 메뉴 선택 구문 분석하는 함수?
+/// </summary>
 int OnCommand(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 
 	int wmId = LOWORD(wParam);
-	// 메뉴 선택을 구문 분석합니다:
+
 	switch (wmId)
 	{
 	case IDM_ABOUT:
@@ -112,6 +148,11 @@ int OnCommand(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 	return 0;
 }
 
+/// <summary>
+/// 창 제거될때 요청 전송
+/// 종료시에 해줘야 할 일을 모아둠
+/// Ex) 메모리 할당 해제등등
+/// </summary>
 int OnDestroy(HWND hWnd, WPARAM wParam, LPARAM lParam) {
 
 	KillTimer(hWnd, CLOCK1);
